@@ -24,20 +24,30 @@ def health():
 
 
 # ---------------- RESET ----------------
-@app.post("/reset", response_model=ResetResponse)
-def reset_env(req: ResetRequest):
-    session_id = req.session_id or str(uuid.uuid4())
+from fastapi import FastAPI
+import uuid
 
-    env = CloudResourceEnv(task=req.task_level)
+app = FastAPI()
+
+sessions = {}
+
+@app.post("/reset")
+def reset_env(req: dict = {}):
+    task_level = req.get("task_level", "EASY")
+
+    session_id = str(uuid.uuid4())
+
+    from environment import CloudResourceEnv
+    env = CloudResourceEnv(task_level=task_level)
+
     obs = env.reset()
 
     sessions[session_id] = env
 
-    return ResetResponse(
-        session_id=session_id,
-        observation=Observation(**obs)
-    )
-
+    return {
+        "session_id": session_id,
+        "observation": obs
+    }
 
 # ---------------- STEP ----------------
 @app.post("/step", response_model=StepResponse)
@@ -57,7 +67,24 @@ def step_env(req: StepRequest):
         info=info
     )
 
+@app.post("/step")
+def step_env(req: dict):
+    session_id = req.get("session_id")
+    action = req.get("action", {}).get("action_type")
 
+    if session_id not in sessions:
+        return {"error": "Session not found"}
+
+    env = sessions[session_id]
+
+    obs, reward, done, info = env.step(action)
+
+    return {
+        "observation": obs,
+        "reward": reward,
+        "done": done,
+        "info": info
+    }
 # ---------------- STATE ----------------
 @app.get("/state/{session_id}", response_model=State)
 def get_state(session_id: str):
