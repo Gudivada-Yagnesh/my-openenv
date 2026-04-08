@@ -1,0 +1,16 @@
+name: cloud_resource_env
+version: "1.0.0"
+description: Cloud resource optimization under dynamic workload pressure
+
+tasks:
+  - name: easy
+    description: Keep memory between 60-80%, avoid overflow, maintain stability
+    max_steps: 50
+
+  - name: medium
+    description: Balance cost vs performance under moderate spikes
+    max_steps: 50
+
+  - name: hard
+    description: Handle bursts, avoid overflow, optimize cost and latency
+    max_steps: 50
