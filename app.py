@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 import uuid
 
-from environment import CloudResourceEnv
+from server.environment import CloudResourceEnv
 
 app = FastAPI()
 
